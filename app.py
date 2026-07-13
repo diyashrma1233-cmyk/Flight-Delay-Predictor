@@ -33,9 +33,10 @@ def load_and_clean_data(path: str) -> pd.DataFrame:
     print(f"Dataset Shape: {df.shape}")
     print(f"\n--- Initial Missing Values ---\n{df.isnull().sum()}")
 
-    # 1. Fix Data Types: Convert wind_speed_kmh to numeric (strings → NaN)
-    if df["wind_speed_kmh"].dtype == "O":
-        df["wind_speed_kmh"] = pd.to_numeric(df["wind_speed_kmh"], errors="coerce")
+    # 1. Fix Data Types: Convert non-numeric columns to numeric (strings → NaN)
+    for col in df.columns:
+        if not pd.api.types.is_numeric_dtype(df[col]):
+            df[col] = pd.to_numeric(df[col], errors="coerce")
 
     # 2. Impute missing numerical data with median strategy
     imputer = SimpleImputer(strategy="median")
@@ -72,7 +73,7 @@ def train_model(df: pd.DataFrame):
     # Evaluate
     y_pred = model.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
-    print(f"\n✅ Random Forest Accuracy: {accuracy:.4f}\n")
+    print(f"\nRandom Forest Accuracy: {accuracy:.4f}\n")
     print("--- Classification Report ---")
     print(classification_report(y_test, y_pred))
 
@@ -81,14 +82,14 @@ def train_model(df: pd.DataFrame):
 
 # Run on import / startup
 print("\n" + "=" * 60)
-print("  Flight Delay Predictor — Initialising …")
+print("  Flight Delay Predictor - Initializing...")
 print("=" * 60 + "\n")
 
 df_clean = load_and_clean_data(CSV_PATH)
 rf_model, feature_names = train_model(df_clean)
 
 print("=" * 60)
-print("  Model ready.  Starting Flask server …")
+print("  Model ready.  Starting Flask server...")
 print("=" * 60 + "\n")
 
 # ---------------------------------------------------------------------------
