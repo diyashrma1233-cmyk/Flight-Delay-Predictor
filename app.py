@@ -13,7 +13,7 @@ from flask import Flask, render_template, request, jsonify
 from sklearn.model_selection import train_test_split
 from sklearn.impute import SimpleImputer
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report
+from sklearn.metrics import accuracy_score, classification_report, mean_absolute_error, r2_score
 
 # ---------------------------------------------------------------------------
 # App Setup
@@ -73,7 +73,11 @@ def train_model(df: pd.DataFrame):
     # Evaluate
     y_pred = model.predict(X_test)
     accuracy = accuracy_score(y_test, y_pred)
-    print(f"\nRandom Forest Accuracy: {accuracy:.4f}\n")
+    mae = mean_absolute_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
+    print(f"\nRandom Forest Accuracy: {accuracy:.4f}")
+    print(f"Mean Absolute Error (MAE): {mae:.4f}")
+    print(f"R-squared (R2) Score: {r2:.4f}\n")
     print("--- Classification Report ---")
     print(classification_report(y_test, y_pred))
 
@@ -136,4 +140,5 @@ def predict():
 # Main
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
-    app.run(debug=False, port = 5000)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
